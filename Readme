@@ -1,0 +1,40 @@
+Replication instructions:
+
+On laptop (or anything with browser/GUI), run `python send_to_internet.py`; it will pop open a browser to authenticate; connect it to the right account and stash the auth creds.
+
+
+1. Turn on ethernet "gadget" abilities using step 1 at https://learn.adafruit.com/turning-your-raspberry-pi-zero-into-a-usb-gadget?view=all#ethernet-gadget
+2. Enable ssh by creating a blank `ssh` file in the root of `boot` (`touch /Volumes/boot/ssh` while sd card is mounted on laptop)
+3. Plug into local router and:
+`ssh pi@raspberrypi.local`
+	3b. If using CMU ethernet, first: plug ethernet into dongle, and into laptop. Run `ifconfig eth0`. Register the device at https://netreg.net.cmu.edu using the MAC address (string following `ether` in the results from ifconfig).
+4. change password: `passwd` (for this project, I used our team name, all one word, lowercase)
+5. Get all the libraries you need:
+	`sudo apt-get update`
+	`sudo apt-get install python-pip`
+	`pip install PyDrive`
+	`sudo apt-get install sane`
+	`sudo apt-get install cups`
+	`sudo usermod -a -G lpadmin pi`
+	`sudo cupsctl --remote-any`
+	`sudo /etc/init.d/cups restart`
+	`sudo apt-get install libcups2-dev` (ref https://stackoverflow.com/questions/23659097/cannot-install-pycups-with-pip-because-of-cups-cups-h-not-found)
+	`pip install pycups`
+
+6. Unpack printerscanner, remove its tape, plug in to power and push the `on` button. Wait for it to do its init sounds. Install ink carts. Plug its usb into pi hub.
+
+7. In laptop browser, visit http://raspberrypi.local:631/
+Add the printer: administration -> add printer -> (click through "upgrade required"/"unsafe connection") -> add printer (login) -> select the canon printer (Canon_MG2500_series) -> add printer (I changed shrink/crop to "crop")
+
+9. On laptop, copy over pi_files to the pi:
+	`scp -r pi_files/ pi@raspberrypi.local`
+	(copy individual files as, e.g.:
+	`scp main.py pi@raspberrypi.local:~/pi_files/main.py`)
+10. On pi, `mkdir ~/scans`
+
+11. Once code is correct, add "python -u /home/pi/twitch-print/twitch_bot.py 2>> /var/log/twitch_bot.err >> /var/log/twitch_bot.out &" to the middle of /etc/rc.local , leaving the line "exit 0" at the end.
+
+
+Good to know: 
+	shut down pi with `sudo halt` or `sudo shutdown -h now`
+
